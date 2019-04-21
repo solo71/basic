@@ -1,6 +1,6 @@
 <?php
 
-use app\models\Users;
+use app\models\User;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
@@ -8,11 +8,11 @@ use yii\widgets\ActiveForm;
 
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Users */
+/* @var $model app\models\User */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="users-form">
+<div class="user-form">
 
     <?php $form = ActiveForm::begin(); ?>
 
