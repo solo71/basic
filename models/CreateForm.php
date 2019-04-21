@@ -18,6 +18,7 @@ class CreateForm extends Model
 
     public $username;
     public $password;
+    public $id;
 
     /**
      * {@inheritdoc}
@@ -30,15 +31,12 @@ class CreateForm extends Model
     /**
      * {@inheritdoc}
      */
-    public function rules()
-    {
+    public function rules() {
         return [
-            [['username', 'password'], 'required'],
-            [['username', 'password', 'role'], 'string', 'max' => 255],
-            [['username'], 'unique'],
+            [['username', 'password'], 'required', 'message' => 'Заполните поле'],
+            ['username', 'unique', 'targetClass' => Users::className(),  'message' => 'Этот логин уже занят'],
         ];
     }
-
     /**
      * {@inheritdoc}
      */

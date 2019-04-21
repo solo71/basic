@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\CreateForm;
+use app\models\Users;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -9,7 +11,6 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
-use app\models\CreateForm;
 
 class SiteController extends Controller
 {
@@ -122,12 +123,44 @@ class SiteController extends Controller
      *
      * @return Response|string
      */
-    public function actionCreate()
+    public function actionCreate(){
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+        $model = new CreateForm();
+        if($model->load(\Yii::$app->request->post()) && $model->validate()){
+            $user = new Users();
+            $user->username = $model->username;
+            $user->password = \Yii::$app->security->generatePasswordHash($model->password);
+            if($user->save()){
+                return $this->goHome();
+            }
+        }
+
+        return $this->render('create', compact('model'));
+    }
+  /*  public function actionCreate()
     {
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
         $model = new CreateForm();
+
+
+        if ($model->load(Yii::$app->request->post())) {
+
+            $user = new Users();
+            $user->generateAuthKey();
+            $user->accessToken = Yii::$app->security->generateRandomKey();
+            $user->username = $model->username;
+            $user->password = \Yii::$app->security->generatePasswordHash($model->password);
+                        if ($user->save()) {
+                            return $this->goHome();
+                        }
+          //  echo '<pre>'; print_r($user);
+            die;
+
+        }
 
         return $this->render('create', [
             'model' => $model,
