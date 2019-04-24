@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\models\CreateForm;
 use app\models\Users;
 use Yii;
 use yii\filters\AccessControl;
@@ -80,12 +79,11 @@ class SiteController extends Controller
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
             return $this->goBack();
+        } else {
+            return $this->render('login', [
+                'model' => $model,
+            ]);
         }
-
-        $model->password = '';
-        return $this->render('login', [
-            'model' => $model,
-        ]);
     }
 
     /**
@@ -127,44 +125,18 @@ class SiteController extends Controller
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
-        $model = new CreateForm();
+        $model = new Users();
         if($model->load(\Yii::$app->request->post()) && $model->validate()){
-            $user = new Users();
-            $user->username = $model->username;
-            $user->password = \Yii::$app->security->generatePasswordHash($model->password);
-            if($user->save()){
+            $model->password=\Yii::$app->security->generatePasswordHash($model->password);
+            if($model->save()){
                 return $this->goHome();
             }
         }
-
-        return $this->render('create', compact('model'));
-    }
-  /*  public function actionCreate()
-    {
-        if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
-        }
-        $model = new CreateForm();
-
-
-        if ($model->load(Yii::$app->request->post())) {
-
-            $user = new Users();
-            $user->generateAuthKey();
-            $user->accessToken = Yii::$app->security->generateRandomKey();
-            $user->username = $model->username;
-            $user->password = \Yii::$app->security->generatePasswordHash($model->password);
-                        if ($user->save()) {
-                            return $this->goHome();
-                        }
-          //  echo '<pre>'; print_r($user);
-            die;
-
-        }
-
         return $this->render('create', [
             'model' => $model,
         ]);
+
+
     }
 
     /**

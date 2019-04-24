@@ -17,7 +17,7 @@ class Users extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return static::findOne($id);
     }
 
     /**
@@ -33,6 +33,12 @@ class Users extends ActiveRecord implements IdentityInterface
 
         return null;
     }
+    public function rules() {
+        return [
+            [['username'], 'required', 'message' => 'Заполните поле'],
+            ['username', 'unique', 'targetClass' => Users::className(),  'message' => 'Этот логин уже занят'],
+        ];
+    }
 
     /**
      * Finds user by username
@@ -42,13 +48,7 @@ class Users extends ActiveRecord implements IdentityInterface
      */
     public static function findByUsername($username)
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return static::findOne(['username' => $username]);
     }
 
     /**
@@ -83,7 +83,13 @@ class Users extends ActiveRecord implements IdentityInterface
      */
     public function validatePassword($password)
     {
-        return $this->password === $password;
+        if (Yii::$app->getSecurity()->validatePassword($password, $this->password)) {
+            // all good, logging user in
+            return true;
+        } else {
+            // wrong password
+            return false;
+        }
     }
 
     /**

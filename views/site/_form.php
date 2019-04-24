@@ -1,13 +1,14 @@
 <?php
 
+use app\models\Users;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\web\View;
 use yii\widgets\ActiveForm;
-use kartik\select2\Select2;
-use app\models\Users;
+
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Users*/
+/* @var $model app\models\Users */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -16,29 +17,46 @@ use app\models\Users;
     <?php $form = ActiveForm::begin(); ?>
 
     <?php
+    if ($action == 'create') {
         $form->field($model, 'id')->hiddenInput()->label(false);
+    } else {
+        $form->field($model, 'id')->input('number', ['disabled' => true]);
+    }
     ?>
 
     <?= $form->field($model, 'username')->textInput(['maxlength' => true]) ?>
-
     <?= $form->field($model, 'password')->textInput(['maxlength' => true]) ?>
 
-    <div class="form-group">
-        <div>
-            <?= Html::submitButton('Регистрация', ['class' => 'btn btn-success']) ?>
+    <?php
+    // Если используется не сценарий создания пользователя
+    if (!$action == 'create') {
+        ?>
+        <div class="form-group">
+            <?= Html::a(
+                Yii::t('app/user', 'Change password'),
+                Url::toRoute(['/backend/user/change-password', 'id' => $model->id]),
+                ['class' => 'btn btn-info']
+            ) ?>
         </div>
-    </div>
-
-
+        <div class="form-group">
+            <?= Html::a(
+                Yii::t('app/user', 'Change user role'),
+                Url::to(['/permit/user/view', 'id' => $model->id]),
+                ['class' => 'btn btn-info']
+            ) ?>
+        </div>
+        <?php
+    }
+    ?>
     <div class="form-group">
-        <?= Html::a(Yii::t('app', 'Back'), Url::to(['/site/index']), ['class' => 'btn btn-default']) ?>
+        <?= Html::a(Yii::t('app', 'Back'), Url::to(['/backend/user/index']), ['class' => 'btn btn-default']) ?>
+        <?= ($action == 'update') ? Html::resetButton(Yii::t('app', 'Reset'), ['class' => 'btn btn-warning']) : null ?>
         <?= Html::submitButton($model->isNewRecord
             ? Yii::t('app', 'Create')
             : Yii::t('app', 'Save')
             , ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
     </div>
 
-    <?php $form->end(); ?>
+    <?php ActiveForm::end(); ?>
 
 </div>
-
