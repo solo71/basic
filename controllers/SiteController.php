@@ -9,7 +9,8 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
-use app\models\CreateForm;
+use app\models\SignupForm;
+use app\models\User;
 
 class SiteController extends Controller
 {
@@ -104,7 +105,7 @@ class SiteController extends Controller
      *
      * @return Response|string
      */
-    public function actionContact()
+  /*  public function actionContact()
     {
         $model = new ContactForm();
         if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
@@ -115,25 +116,24 @@ class SiteController extends Controller
         return $this->render('contact', [
             'model' => $model,
         ]);
-    }
-
-    /**
-     * Displays create page.
-     *
-     * @return Response|string
-     */
-    public function actionCreate()
+    }*/
+    public function actionContact()
     {
-        if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
+        $model = new ContactForm();
+        if ($user = Yii::$app->user->identity) {
+            /** @var \app\models\User $user */
+            $model->name = $user->username;
+            $model->email = $user->email;
         }
-        $model = new CreateForm();
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
+            Yii::$app->session->setFlash('contactFormSubmitted');
+            return $this->refresh();
+        } else {
+            return $this->render('contact', [
+                'model' => $model,
+            ]);
+        }
     }
-
     /**
      * Displays about page.
      *
@@ -143,4 +143,23 @@ class SiteController extends Controller
     {
         return $this->render('about');
     }
+
+    public function actionSignup()
+    {
+        $model = new SignupForm();
+
+        if ($model->load(Yii::$app->request->post())) {
+            if ($user = $model->signup()) {
+                if (Yii::$app->getUser()->login($user)) {
+                    return $this->goHome();
+                }
+            }
+        }
+
+        return $this->render('signup', [
+            'model' => $model,
+        ]);
+    }
+
+
 }
